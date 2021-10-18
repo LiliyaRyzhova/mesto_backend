@@ -26,7 +26,13 @@ const validateCard = celebrate({
 
 const validateId = celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24).hex(),
+    userId: Joi.string().alphanum().length(24).hex(),
+  }),
+});
+
+const validateCardId = celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex(),
   }),
 });
 
@@ -60,7 +66,6 @@ const validateLogin = celebrate({
   }),
 });
 
-
 module.exports = {
   validateCard,
   validateId,
@@ -69,4 +74,5 @@ module.exports = {
   validateAvatar,
   validateLogin,
   errorsHandler,
+  validateCardId,
 };

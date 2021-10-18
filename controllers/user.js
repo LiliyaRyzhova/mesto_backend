@@ -18,7 +18,7 @@ module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        throw new ValidationError('Пользователь по указанному _id не найден.');
+        throw new NotFoundError('Пользователь по указанному _id не найден.');
       } else {
         res.status(200).send({ data: user });
       }
@@ -26,6 +26,8 @@ module.exports.getCurrentUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new ValidationError('Невалидный id ');
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -43,6 +45,8 @@ module.exports.checkToken = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new ValidationError('Невалидный id ');
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -56,22 +60,22 @@ module.exports.createUser = (req, res, next) => {
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
-    }))
-    .catch((err) => {
-      if (err.name === 'MongoServerError' || err.code === 11000) {
-        next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
-      }
     })
-    .then((user) => res.status(200).send({
-      data: {
-        name: user.name, about: user.about, avatar, email: user.email,
-      },
-    }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new ValidationError('Некорректные данные');
-      }
-    })
+      .then((user) => res.status(200).send({
+        data: {
+          name: user.name, about: user.about, avatar, email: user.email,
+        },
+      }))
+      .catch((err) => {
+        if (err.name === 'MongoServerError' || err.code === 11000) {
+          next(new ConflictError('Пользователь с таким email уже зарегистрирован'));
+        }
+        if (err.name === 'ValidationError') {
+          throw new ValidationError('Некорректные данные');
+        } else {
+          next(err);
+        }
+      }))
     .catch(next);
 };
 
@@ -88,6 +92,8 @@ module.exports.updateUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new ValidationError('Некорректные данные');
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -106,6 +112,8 @@ module.exports.updateAvatar = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new ValidationError('Некорректные данные');
+      } else {
+        next(err);
       }
     })
     .catch(next);

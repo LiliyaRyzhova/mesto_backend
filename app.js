@@ -21,7 +21,7 @@ const app = express();
 const { PORT = 3000, MONGO_URI = 'mongodb://localhost:27017/mestodb' } = process.env;
 
 app.use(cors({
-  origin: 'https://mesto.rls.nomoredomains.club',
+  origin: ['https://mesto.rls.nomoredomains.club', 'http://mesto.rls.nomoredomains.club'],
   credentials: true,
 }));
 
@@ -43,11 +43,11 @@ app.post('/signin', validateLogin, login);
 app.use('/users', auth, require('./routes/user'));
 app.use('/cards', auth, require('./routes/card'));
 
-app.use(errorLogger);
-
 app.use('*', () => {
-  throw new NotFoundError({ message: 'Запрашиваемый ресурс не найден' });
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 app.use(errorsHandler);
